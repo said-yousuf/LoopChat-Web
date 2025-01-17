@@ -27,11 +27,9 @@ export function ChatPage() {
 
         setChats(chats);
 
-        console.log('chats', chats);
-        console.log('userId', userId);
         // Move this inside the try block after setChats
         const currentChat = chats.find((chat) => chat.userId === userId);
-        console.log('currentChat', currentChat);
+
         if (currentChat) {
           setCurrentChat(currentChat.chatId);
 

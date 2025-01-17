@@ -4,7 +4,7 @@ import { io, Socket } from 'socket.io-client';
 
 class SocketService {
   private socket: Socket | null = null;
-  private readonly SOCKET_URL = 'http://172.30.10.136:3001/chat';
+  private readonly SOCKET_URL = 'http://localhost:3001/chat';
   private isConnected = false;
 
   getConnectionStatus() {
@@ -18,8 +18,6 @@ class SocketService {
       console.error('No authentication token or user found');
       return;
     }
-
-    console.log('Connecting to socket server with token:', token);
 
     this.socket = io(this.SOCKET_URL, {
       auth: {
@@ -68,20 +66,36 @@ class SocketService {
 
     this.socket.on('message', (message) => {
       const { addMessage } = useChatStore.getState();
-
-      console.log(message);
+      const { currentUser } = useAuthStore.getState();
 
       addMessage(message.roomId, {
         ...message,
-        isMine: false,
-        status: 'received',
+        isSender: message.user === currentUser?.id ? true : false,
+        sender: {
+          id: message.user,
+          username: message.name,
+        },
       });
     });
 
-    // this.socket.on('message:status', ({ chatId, messageId, status }) => {
-    //   const { updateMessageStatus } = useChatStore.getState();
-    //   updateMessageStatus(chatId, messageId, status);
-    // });
+    this.socket.on('user:status', ({ userId, username, status }) => {
+      const { updateUserStatus } = useChatStore.getState();
+
+      updateUserStatus(userId, status);
+    });
+
+    this.socket.on('users:online', (onlineUsers) => {
+      const { updateUserStatus } = useChatStore.getState();
+      onlineUsers.forEach((user: any) => {
+        updateUserStatus(user.id, user.status);
+      });
+    });
+
+    this.socket.on('message:read', ({ roomId, recieverId, isRead }) => {
+      const { updateMessageStatus } = useChatStore.getState();
+
+      updateMessageStatus(roomId, recieverId, isRead);
+    });
 
     // this.socket.on('user:typing', ({ chatId, userId, name }) => {
     //   const { setTyping } = useChatStore.getState();
@@ -94,7 +108,7 @@ class SocketService {
     // });
   }
 
-  sendMessage(content: string) {
+  sendMessage(content: string, typingUsers: any) {
     if (!this.socket) {
       console.error('Socket not connected');
       return null;
@@ -104,7 +118,8 @@ class SocketService {
       Math.random().toString(36).substring(2) + Date.now().toString(36);
     this.socket.emit('sendMessage', {
       message: content,
-      messageId,
+      name: typingUsers.name,
+      userId: typingUsers.userId,
     });
 
     return messageId;

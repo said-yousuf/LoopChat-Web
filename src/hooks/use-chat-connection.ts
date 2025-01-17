@@ -10,28 +10,13 @@ export function useChatConnection(chatId: string) {
   const [isConnected, setIsConnected] = useState(false);
 
   const sendMessage = useCallback(
-    async (content: string, attachments?: FileAttachment[]) => {
-      const messageId = socketService.sendMessage(content);
+    async (
+      content: string,
+      typingUsers?: any,
+      attachments?: FileAttachment[]
+    ) => {
+      const messageId = socketService.sendMessage(content, typingUsers);
       const { currentUser } = useAuthStore.getState();
-
-      if (messageId) {
-        const message: Message = {
-          id: messageId,
-          chatId,
-          content,
-          contentType: 'TEXT',
-          isRead: false,
-          sender: {
-            id: currentUser?.id || '',
-            username: currentUser?.username || '',
-            profile_photo: currentUser?.profile_photo || null,
-          },
-          createdAt: new Date().toISOString(),
-          isSender: true,
-          attachments,
-        };
-        addMessage(chatId, message);
-      }
     },
     [chatId, addMessage]
   );

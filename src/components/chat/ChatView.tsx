@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useChatConnection } from '@/hooks/use-chat-connection';
 import { UploadedFile } from '@/services/upload-service';
-import { useChatStore } from '@/store/chat-store';
+import { useChatStore, UserStatus } from '@/store/chat-store';
 import {
   MoreVertical,
   Paperclip,
@@ -24,8 +24,9 @@ interface ChatViewProps {
     id: string;
     name: string;
     avatar?: string;
-    status: 'online' | 'offline';
+    status: UserStatus;
     lastSeen?: Date;
+    userId: string;
   };
 }
 
@@ -73,8 +74,15 @@ export function ChatView({ chat }: ChatViewProps) {
   const handleSendMessage = async () => {
     if (!newMessage.trim()) return;
 
-    await sendMessage(newMessage);
+    const messageText = newMessage;
     setNewMessage('');
+
+    try {
+      await sendMessage(messageText, { name: chat.name, userId: chat.userId });
+    } catch (error) {
+      console.error('Failed to send message:', error);
+      setNewMessage(messageText);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {

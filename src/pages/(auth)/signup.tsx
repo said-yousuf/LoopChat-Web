@@ -1,46 +1,62 @@
-import * as yup from "yup"
-import { useForm } from "react-hook-form"
-import { yupResolver } from "@hookform/resolvers/yup"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { FcGoogle } from "react-icons/fc"
-import { useNavigate } from "react-router-dom"
+import * as yup from 'yup';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  Card,
+  CardHeader,
+  CardContent,
+  CardFooter,
+} from '@/components/ui/card';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { FcGoogle } from 'react-icons/fc';
+import { useNavigate } from 'react-router-dom';
 
-const schema = yup.object({
-  email: yup
-    .string()
-    .email("Please enter a valid email")
-    .required("Email is required"),
-  fullName: yup
-    .string()
-    .min(2, "Name must be at least 2 characters")
-    .required("Full name is required"),
-  username: yup
-    .string()
-    .min(3, "Username must be at least 3 characters")
-    .matches(/^[a-zA-Z0-9_]+$/, "Username can only contain letters, numbers and underscores")
-    .required("Username is required"),
-}).required()
+const schema = yup
+  .object({
+    email: yup
+      .string()
+      .email('Please enter a valid email')
+      .required('Email is required'),
+    fullName: yup
+      .string()
+      .min(2, 'Name must be at least 2 characters')
+      .required('Full name is required'),
+    username: yup
+      .string()
+      .min(3, 'Username must be at least 3 characters')
+      .matches(
+        /^[a-zA-Z0-9_]+$/,
+        'Username can only contain letters, numbers and underscores'
+      )
+      .required('Username is required'),
+  })
+  .required();
 
-type FormData = yup.InferType<typeof schema>
+type FormData = yup.InferType<typeof schema>;
 
 const SignUpPage = () => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const form = useForm<FormData>({
     resolver: yupResolver(schema),
     defaultValues: {
-      email: "",
-      fullName: "",
-      username: "",
+      email: '',
+      fullName: '',
+      username: '',
     },
-  })
+  });
 
   const onSubmit = (data: FormData) => {
-    console.log(data)
-    navigate("/verify-otp")
-  }
+    navigate('/verify-otp');
+  };
 
   return (
     <div className="w-full min-h-screen bg-[url('/src/assets/img1.jpg')] bg-cover bg-center bg-no-repeat flex items-center justify-center">
@@ -112,20 +128,16 @@ const SignUpPage = () => {
               <FcGoogle className="mr-2 h-4 w-4" />
               Google
             </Button>
-            
           </div>
         </CardContent>
         <CardFooter className="flex flex-col space-y-2">
-          <Button 
-            className="w-full" 
-            onClick={form.handleSubmit(onSubmit)}
-          >
+          <Button className="w-full" onClick={form.handleSubmit(onSubmit)}>
             Continue
           </Button>
           <p className="text-sm text-center text-muted-foreground">
-            Already have an account?{" "}
-            <a 
-              onClick={() => navigate("/login")} 
+            Already have an account?{' '}
+            <a
+              onClick={() => navigate('/login')}
               className="text-primary hover:underline cursor-pointer"
             >
               Sign in
@@ -134,7 +146,7 @@ const SignUpPage = () => {
         </CardFooter>
       </Card>
     </div>
-  )
-}
+  );
+};
 
-export { SignUpPage } 
+export { SignUpPage };

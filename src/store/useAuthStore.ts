@@ -7,11 +7,16 @@ interface AuthState {
   currentUser: {
     id: string;
     username: string;
+    email: string;
     profile_photo: string | null;
+    createdAt: string;
+    updatedAt: string;
+    deletedAt: string | null;
   } | null;
   setToken: (token: string | null) => void;
   login: (token: string) => void;
   logout: () => void;
+  setCurrentUser: (user: any) => void;
 }
 
 export const useAuthStore = create<AuthState>()(

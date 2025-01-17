@@ -32,17 +32,20 @@ export interface Chat {
   chatId: string;
   name: string;
   avatar?: string;
-  status: 'online' | 'offline';
+  status: UserStatus;
   unread: number;
   lastMessage?: string;
   lastSeen?: Date;
 }
+
+export type UserStatus = 'online' | 'offline' | 'away';
 
 interface ChatState {
   chats: Chat[];
   currentChatId: string | null;
   messages: Record<string, Message[]>;
   typingUsers: Record<string, { userId: string; name: string }>;
+  userStatuses: Record<string, UserStatus>;
   setCurrentChat: (chatId: string | null) => void;
   addMessage: (roomId: string, message: Message) => void;
   updateMessageStatus: (
@@ -67,15 +70,18 @@ interface ChatState {
   ) => void;
   setChats: (chats: Chat[]) => void;
   setMessages: (chatId: string, messages: Message[]) => void;
+  updateUserStatus: (userId: string, status: UserStatus) => void;
+  getUserStatus: (userId: string) => UserStatus;
 }
 
 export const useChatStore = create<ChatState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       chats: [],
       currentChatId: null,
       messages: {},
       typingUsers: {},
+      userStatuses: {},
       setCurrentChat: (chatId) => set({ currentChatId: chatId }),
       addMessage: (chatId, message) =>
         set((state) => ({
@@ -93,12 +99,12 @@ export const useChatStore = create<ChatState>()(
               : chat
           ),
         })),
-      updateMessageStatus: (chatId, messageId, status) =>
+      updateMessageStatus: (chatId, userId, status) =>
         set((state) => ({
           messages: {
             ...state.messages,
             [chatId]: state.messages[chatId].map((msg) =>
-              msg.id === messageId ? { ...msg, status } : msg
+              msg.sender.id === userId ? { ...msg, isRead: status } : msg
             ),
           },
         })),
@@ -164,6 +170,20 @@ export const useChatStore = create<ChatState>()(
             [chatId]: messages,
           },
         })),
+      updateUserStatus: (userId, status) =>
+        set((state) => ({
+          userStatuses: {
+            ...state.userStatuses,
+            [userId]: status,
+          },
+          chats: state.chats.map((chat) =>
+            chat.userId === userId ? { ...chat, status } : chat
+          ),
+        })),
+      getUserStatus: (userId) => {
+        const state = get();
+        return state.userStatuses[userId] || 'offline';
+      },
     }),
     {
       name: 'chat-storage',
@@ -171,6 +191,7 @@ export const useChatStore = create<ChatState>()(
         chats: state.chats,
         messages: state.messages,
         currentChatId: state.currentChatId,
+        userStatuses: state.userStatuses,
       }),
     }
   )

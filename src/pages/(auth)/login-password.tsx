@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { login } from '@/services/auth-service';
+import { getProfile } from '@/services/chat';
 import { socketService } from '@/services/socket';
 import { useAuthStore } from '@/store/useAuthStore';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -31,7 +32,7 @@ type FormData = yup.InferType<typeof schema>;
 
 export function LoginPasswordPage() {
   const navigate = useNavigate();
-  const { login: setAuth } = useAuthStore();
+  const { login: setAuth, setCurrentUser } = useAuthStore();
   const location = useLocation();
   const email = location.state?.email;
 
@@ -53,9 +54,12 @@ export function LoginPasswordPage() {
 
   const onSubmit = async (data: FormData) => {
     try {
-      console.log(data);
       const response = await login(data);
       setAuth(response.token);
+
+      const profile = await getProfile();
+
+      setCurrentUser(profile);
       socketService.connect(response.token);
       navigate('/main');
     } catch (error) {

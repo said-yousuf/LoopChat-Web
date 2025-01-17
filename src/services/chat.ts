@@ -2,6 +2,26 @@ import { getRequest } from '@/lib/http';
 
 /*
 / ----------------------------------
+/ Get Profile
+/ ----------------------------------
+*/
+
+interface UserProfile {
+  id: string;
+  username: string;
+  email: string;
+  profile_photo: string | null;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+}
+
+export function getProfile() {
+  return getRequest<UserProfile>('/chat/profile');
+}
+
+/*
+/ ----------------------------------
 / Chat
 / ----------------------------------
 */

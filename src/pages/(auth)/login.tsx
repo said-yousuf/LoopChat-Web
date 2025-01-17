@@ -41,7 +41,6 @@ const LoginPage = () => {
   });
 
   const onSubmit = (data: FormData) => {
-    console.log(data);
     navigate('/login/password', { state: { email: data.email } });
   };
 
