@@ -97,15 +97,15 @@ class SocketService {
       updateMessageStatus(roomId, recieverId, isRead);
     });
 
-    // this.socket.on('user:typing', ({ chatId, userId, name }) => {
-    //   const { setTyping } = useChatStore.getState();
-    //   setTyping(chatId, userId, name);
-    // });
+    this.socket.on('userTyping', ({ chatId, userId, name }) => {
+      const { setTyping } = useChatStore.getState();
+      setTyping(chatId, userId, name);
+    });
 
-    // this.socket.on('user:stop-typing', ({ chatId, userId }) => {
-    //   const { clearTyping } = useChatStore.getState();
-    //   clearTyping(chatId, userId);
-    // });
+    this.socket.on('stopTyping', ({ chatId, userId }) => {
+      const { clearTyping } = useChatStore.getState();
+      clearTyping(chatId, userId);
+    });
   }
 
   sendMessage(content: string, typingUsers: any) {
@@ -145,9 +145,7 @@ class SocketService {
   sendTyping(chatId: string, isTyping: boolean) {
     if (!this.socket) return;
 
-    this.socket.emit(isTyping ? 'user:typing' : 'user:stop-typing', {
-      chatId,
-    });
+    this.socket.emit(isTyping ? 'startTyping' : 'stopTyping');
   }
 
   // Add reaction to message
